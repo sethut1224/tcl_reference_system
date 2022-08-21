@@ -1,0 +1,108 @@
+/**:
+  ros__parameters:
+    front_lidar_driver:
+      execution_time_mean: 3
+      execution_time_deviation: 0.5
+  
+      message_size_mean: 40000
+      message_size_deviation: 2000.0
+
+      publish_topics: ['/front_lidar/points_raw']
+
+    voxel_grid_filter:
+      execution_time_mean: 8
+      execution_time_deviation: 0.5
+
+      message_size_mean: 10000
+      message_size_deviation: 2000.0
+
+      subscribe_topics: ['/lidars/fused_points']
+      publish_topics: ['/lidars/downsampled_points']
+    
+    ndt_localizer:
+      execution_time_mean: 45
+      execution_time_deviation: 6.0
+
+      message_size_mean: 2000
+      message_size_deviation: 0.0
+
+      subscribe_topics: ['/lidars/downsampled_points']
+      publish_topics: ['/ndt_pose']
+
+    rear_lidar_driver:
+      execution_time_mean: 3
+      execution_time_deviation: 0.5
+
+      message_size_mean: 40000
+      message_size_deviation: 2000.0
+
+      publish_topics: ['/rear_lidar/points_raw']
+    
+    point_cloud_fusion:
+      execution_time_mean: 4
+      execution_time_deviation: 0.5
+
+      message_size_mean: 80000
+      message_size_deviation: 1000.0
+
+      subscribe_topics: ['/front_lidar/points_raw', '/rear_lidar/points_raw']
+      publish_topics: ['/lidars/fused_points']
+
+    ray_ground_filter:
+      execution_time_mean: 9
+      execution_time_deviation: 1.0
+
+      message_size_mean: 20000
+      message_size_deviation: 2000.0
+
+      subscribe_topics: ['/lidars/fused_points']
+      publish_topics: ['/lidars/no_ground_points']
+    
+    euclidean_clustering:
+      execution_time_mean: 20
+      execution_time_deviation: 3.0
+
+      message_size_mean: 5000
+      message_size_deviation: 1000.0
+
+      subscribe_topics: ['/lidars/no_ground_points']
+      publish_topics: ['/detected_objects']
+
+    odom_driver:
+      execution_time_mean: 1
+      execution_time_deviation: 0.2
+
+      message_size_mean: 1000
+      message_size_deviation: 0.0
+
+      publish_topics: ['/odom_raw']
+    
+    vehicle_interface:
+      execution_time_mean: 1
+      execution_time_deviation: 0.2
+
+      message_size_mean: 500
+      message_size_deviation: 0.0
+
+      subscribe_topics: ['/odom_raw']
+      publish_topics: ['/vehicle_status']
+    
+    ekf_localizer:
+      execution_time_mean: 3
+      execution_time_deviation: 0.4
+
+      message_size_mean: 400
+      message_size_deviation: 0.0
+
+      subscribe_topics: ['/ndt_pose', '/vehicle_status']
+      publish_topics: ['/ekf_pose']
+
+    behavior_planner:
+      execution_time_mean: 3
+      execution_time_deviation: 0.3
+
+      message_size_mean: 3000
+      message_size_deviation: 0.1
+
+      subscribe_topics: ['/ekf_pose', '/detected_objects']
+      publish_topics: ['/trajectory']
