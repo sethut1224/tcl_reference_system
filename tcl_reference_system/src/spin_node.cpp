@@ -106,7 +106,9 @@ namespace tcl_reference_system
 
         for(int i = 0; i < length; ++i)
             msg->data.emplace_back();
-
+        
+        this->get_node_timing_coordination_interface()->propagate_timing_message();
+        
         std::for_each(pub_map_.begin(), pub_map_.end(), [&](auto& iter)
         {
             iter.second->publish(std::move(msg));

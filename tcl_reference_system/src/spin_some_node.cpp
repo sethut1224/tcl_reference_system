@@ -96,6 +96,8 @@ namespace tcl_reference_system
 
         auto timing_header = this->get_node_timing_coordination_interface()->create_timing_header();
 
+        this->get_node_timing_coordination_interface()->propagate_timing_message();
+        
         std::for_each(pub_map_.begin(), pub_map_.end(), [&](auto& iter)
         {
             iter.second->publish(std::move(msg));

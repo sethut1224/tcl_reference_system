@@ -5,7 +5,7 @@
       execution_time_deviation: 0.5
   
       message_size_mean: 40000
-      message_size_deviation: 2000.0
+      message_size_deviation: 200.0
 
       publish_topics: ['/front_lidar/points_raw']
 
@@ -34,7 +34,7 @@
       execution_time_deviation: 0.5
 
       message_size_mean: 40000
-      message_size_deviation: 2000.0
+      message_size_deviation: 200.0
 
       publish_topics: ['/rear_lidar/points_raw']
     
