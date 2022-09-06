@@ -56,8 +56,6 @@ def generate_launch_description():
                     'tcl_sched_param.phase' : 0,
                     'tcl_sched_param.priority' : 90,
                     'tcl_sched_param.ref_time_point' : reference_time_point,
-                    # 'tcl_timing_param.sub_timing_observation_topics' : ['']
-                    'tcl_timing_param.pub_timing_observation_topics' : ['/front_lidar/points_raw'],
                     'tcl_timing_param.enable_profile' : True
                 }
             ],
@@ -76,8 +74,7 @@ def generate_launch_description():
                     'tcl_sched_param.rate' : 5,
                     'tcl_sched_param.phase' : 0,
                     'tcl_sched_param.priority' : 90,
-                    # 'tcl_timing_param.sub_timing_observation_topics' : ['']
-                    'tcl_timing_param.pub_timing_observation_topics' : ['/rear_lidar/points_raw'],
+                    'tcl_sched_param.ref_time_point' : reference_time_point,
                     'tcl_timing_param.enable_profile' : True
                 }
             ],
@@ -99,7 +96,6 @@ def generate_launch_description():
                     'tcl_sched_param.blocking_topics' : ['/front_lidar/points_raw', '/rear_lidar/points_raw'],
                     'tcl_sched_param.ref_time_point' : reference_time_point,
                     'tcl_timing_param.sub_timing_observation_topics' : ['/front_lidar_driver/tcl_timing', '/rear_lidar_driver/tcl_timing'],
-                    'tcl_timing_param.pub_timing_observation_topics' : ['/lidars/fused_points'],
                     'tcl_timing_param.enable_profile' : True
                 }
             ],
@@ -120,8 +116,8 @@ def generate_launch_description():
                     'tcl_sched_param.priority' : 90,
                     'tcl_sched_param.blocking_topics' : ['/lidars/fused_points'],
                     'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/point_cloud_fusion/timing'],
-                    'tcl_timing_param.pub_timing_observation_topics' : ['/lidars/downsampled_points'],
+                    'tcl_timing_param.sub_timing_observation_topics' : ['/point_cloud_fusion/tcl_timing'],
+                    'tcl_timing_param.enable_profile' : True
                 }
             ],
         )
@@ -141,8 +137,8 @@ def generate_launch_description():
                     'tcl_sched_param.priority' : 90,
                     'tcl_sched_param.blocking_topics' : ['/lidars/downsampled_points'],
                     'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/voxel_grid_filter/timing'],
-                    'tcl_timing_param.pub_timing_observation_topics' : ['/ndt_pose'],
+                    'tcl_timing_param.sub_timing_observation_topics' : ['/voxel_grid_filter/tcl_timing'],
+                    'tcl_timing_param.enable_profile' : True
                 }
             ],
         )
@@ -162,8 +158,8 @@ def generate_launch_description():
                     'tcl_sched_param.priority' : 90,
                     'tcl_sched_param.blocking_topics' : ['/lidars/fused_points'],
                     'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/point_cloud_fusion/timing'],
-                    'tcl_timing_param.pub_timing_observation_topics' : ['/lidars/no_ground_points'],
+                    'tcl_timing_param.sub_timing_observation_topics' : ['/point_cloud_fusion/tcl_timing'],
+                    'tcl_timing_param.enable_profile' : True
                 }
             ],
         )
@@ -183,8 +179,8 @@ def generate_launch_description():
                     'tcl_sched_param.priority' : 90,
                     'tcl_sched_param.blocking_topics' : ['/lidars/no_ground_points'],
                     'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/ray_ground_filter/timing'],
-                    'tcl_timing_param.pub_timing_observation_topics' : ['/detected_objects'],
+                    'tcl_timing_param.sub_timing_observation_topics' : ['/ray_ground_filter/tcl_timing'],
+                    'tcl_timing_param.enable_profile' : True
                 }
             ],
         )
@@ -273,10 +269,10 @@ def generate_launch_description():
         front_lidar_driver,
         rear_lidar_driver,
         point_cloud_fusion,
-        # voxel_grid_filter,
-        # ray_ground_filter,
-        # ndt_localizer,
-        # euclidean_clustering,
+        voxel_grid_filter,
+        ray_ground_filter,
+        ndt_localizer,
+        euclidean_clustering,
         # odom_driver,
         # vehicle_interface,
         # ekf_localizer,

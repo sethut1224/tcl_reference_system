@@ -63,6 +63,8 @@ namespace tcl_reference_system
     void
     SpinNode::blocking_topic_callback(const DynamicMessage::SharedPtr msg)
     {   
+        auto timing_header = this->get_node_timing_coordination_interface()->get_timing_header_ptr();
+
         static uint8_t count = 0;
         // RCLCPP_INFO(this->get_logger(), "Subscribe");
         int sum = 0;
