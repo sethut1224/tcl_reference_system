@@ -22,14 +22,12 @@ from ament_index_python.packages import get_package_share_directory
 import time
 import os
 import yaml
+import sys
 
-# margin = 1000000000
-margin = 0
-reference_time_point = time.clock_gettime_ns(time.CLOCK_REALTIME) + margin
+sys.path.append(get_package_share_directory('tcl_reference_system')+'/config')
+from test_case2_config import *
 
-#timing_observation_topics = ['/front_lidar/points_raw', '/rear_lidar/points_raw', '/lidars/fused_points', '/lidars/downsampled_points', '/lidars/no_ground_points', '/detected_objects', '/ndt_pose', '/odom_raw', '/vehicle_status', '/ekf_pose', '/trajectory']
 
-timing_observation_topics=['']
 def generate_launch_description():
     os.sched_setaffinity ( 0 , [11])
 
@@ -44,237 +42,95 @@ def generate_launch_description():
 
     front_lidar_driver = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='spin_some', 
+            executable='timer_node', 
             name='front_lidar_driver',
             output='screen', 
             parameters=[
                 node_characteristics_param['front_lidar_driver'],
-                {
-                    'tcl_sched_param.type': 0,
-                    'tcl_sched_param.cpu' : 1,
-                    'tcl_sched_param.rate' : 5,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 90,
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.enable_profile' : True
-                }
+                get_tcl_sched_param('front_lidar_driver'),
+                get_tcl_timing_param('front_lidar_driver')
             ],
         )
     
     rear_lidar_driver = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='spin_some', 
+            executable='timer_node', 
             name='rear_lidar_driver',
             output='screen', 
             parameters=[
                 node_characteristics_param['rear_lidar_driver'],
-                {
-                    'tcl_sched_param.type': 0,
-                    'tcl_sched_param.cpu' : 2,
-                    'tcl_sched_param.rate' : 5,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 90,
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.enable_profile' : True
-                }
+                get_tcl_sched_param('rear_lidar_driver'),
+                get_tcl_timing_param('rear_lidar_driver')
             ],
         )
     
     point_cloud_fusion = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='spin_node', 
+            executable='spin_main', 
             name='point_cloud_fusion',
             output='screen', 
             parameters=[
                 node_characteristics_param['point_cloud_fusion'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 2,
-                    'tcl_sched_param.rate' : 5,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 90,
-                    'tcl_sched_param.blocking_topics' : ['/front_lidar/points_raw', '/rear_lidar/points_raw'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/front_lidar_driver/tcl_timing', '/rear_lidar_driver/tcl_timing'],
-                    'tcl_timing_param.enable_profile' : True
-                }
+                get_tcl_sched_param('point_cloud_fusion'),
+                get_tcl_timing_param('point_cloud_fusion')
             ],
-        )
+    )
     
     voxel_grid_filter = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='spin_node', 
+            executable='spin_main', 
             name='voxel_grid_filter',
             output='screen', 
             parameters=[
                 node_characteristics_param['voxel_grid_filter'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 1,
-                    'tcl_sched_param.rate' : 5,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 90,
-                    'tcl_sched_param.blocking_topics' : ['/lidars/fused_points'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/point_cloud_fusion/tcl_timing'],
-                    'tcl_timing_param.enable_profile' : True
-                }
+                get_tcl_sched_param('voxel_grid_filter'),
+                get_tcl_timing_param('voxel_grid_filter')
             ],
         )
     
     ndt_localizer = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='spin_node', 
+            executable='spin_main', 
             name='ndt_localizer',
             output='screen', 
             parameters=[
                 node_characteristics_param['ndt_localizer'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 1,
-                    'tcl_sched_param.rate' : 5,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 90,
-                    'tcl_sched_param.blocking_topics' : ['/lidars/downsampled_points'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/voxel_grid_filter/tcl_timing'],
-                    'tcl_timing_param.enable_profile' : True
-                }
+                get_tcl_sched_param('ndt_localizer'),
+                get_tcl_timing_param('ndt_localizer')
             ],
         )
 
     ray_ground_filter = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='spin_node', 
+            executable='spin_main', 
             name='ray_ground_filter',
             output='screen', 
             parameters=[
                 node_characteristics_param['ray_ground_filter'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 2,
-                    'tcl_sched_param.rate' : 5,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 90,
-                    'tcl_sched_param.blocking_topics' : ['/lidars/fused_points'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/point_cloud_fusion/tcl_timing'],
-                    'tcl_timing_param.enable_profile' : True
-                }
+                get_tcl_sched_param('ray_ground_filter'),
+                get_tcl_timing_param('ray_ground_filter')
             ],
         )
 
     euclidean_clustering = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='spin_node', 
+            executable='spin_main', 
             name='euclidean_clustering',
             output='screen', 
             parameters=[
                 node_characteristics_param['euclidean_clustering'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 2,
-                    'tcl_sched_param.rate' : 5,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 90,
-                    'tcl_sched_param.blocking_topics' : ['/lidars/no_ground_points'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.sub_timing_observation_topics' : ['/ray_ground_filter/tcl_timing'],
-                    'tcl_timing_param.enable_profile' : True
-                }
-            ],
-        )
-
-    odom_driver = launch_ros.actions.Node(
-            package='tcl_reference_system', 
-            executable='spin_some', 
-            name='odom_driver',
-            output='screen', 
-            parameters=[
-                node_characteristics_param['odom_driver'],
-                {
-                    'tcl_sched_param.type': 0,
-                    'tcl_sched_param.cpu' : 3,
-                    'tcl_sched_param.rate' : 20,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 98,
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.timing_observation_topics' : timing_observation_topics,
-                }
-            ],
-        )
-
-    vehicle_interface = launch_ros.actions.Node(
-            package='tcl_reference_system', 
-            executable='spin_node', 
-            name='vehicle_interface',
-            output='screen', 
-            parameters=[
-                node_characteristics_param['vehicle_interface'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 3,
-                    'tcl_sched_param.rate' : 20,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 98,
-                    'tcl_sched_param.blocking_topics' : ['/odom_raw'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.timing_observation_topics' : timing_observation_topics,
-                }
-            ],
-        )
-
-    ekf_localizer = launch_ros.actions.Node(
-            package='tcl_reference_system', 
-            executable='spin_node', 
-            name='ekf_localizer',
-            output='screen', 
-            parameters=[
-                node_characteristics_param['ekf_localizer'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 3,
-                    'tcl_sched_param.rate' : 20,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 98,
-                    'tcl_sched_param.blocking_topics' : ['/vehicle_status'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.timing_observation_topics' : timing_observation_topics,
-                }
-            ],
-        )
-
-    behavior_planner = launch_ros.actions.Node(
-            package='tcl_reference_system', 
-            executable='spin_node', 
-            name='behavior_planner',
-            output='screen', 
-            parameters=[
-                node_characteristics_param['behavior_planner'],
-                {
-                    'tcl_sched_param.type': 1,
-                    'tcl_sched_param.cpu' : 3,
-                    'tcl_sched_param.rate' : 20,
-                    'tcl_sched_param.phase' : 0,
-                    'tcl_sched_param.priority' : 98,
-                    'tcl_sched_param.blocking_topics' : ['/ekf_pose'],
-                    'tcl_sched_param.ref_time_point' : reference_time_point,
-                    'tcl_timing_param.timing_observation_topics' : timing_observation_topics,
-                }
+                get_tcl_sched_param('euclidean_clustering'),
+                get_tcl_timing_param('euclidean_clustering')
             ],
         )
 
 
     return launch.LaunchDescription([
+        point_cloud_fusion,
         front_lidar_driver,
         rear_lidar_driver,
-        point_cloud_fusion,
         voxel_grid_filter,
         ray_ground_filter,
         ndt_localizer,
         euclidean_clustering,
-        # odom_driver,
-        # vehicle_interface,
-        # ekf_localizer,
-        # behavior_planner
     ])

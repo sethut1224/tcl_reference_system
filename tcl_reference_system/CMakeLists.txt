@@ -9,7 +9,9 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
-find_package(tcl_reference_interfaces REQUIRED)
+find_package(tcl_reference_system_msg REQUIRED)
+find_package(tcl_std_msgs REQUIRED)
+find_package(reference_tcl_interface REQUIRED)
 
 include_directories(include)
 # uncomment the following section in order to fill in
@@ -25,7 +27,8 @@ src/spin_some_node.cpp)
 ament_target_dependencies(spin_some
   "rclcpp"
   "rclcpp_components"
-  "tcl_reference_interfaces"
+  "tcl_reference_system_msg"
+  "reference_tcl_interface"
 )
 
 add_library(timer SHARED
@@ -34,24 +37,37 @@ add_library(timer SHARED
 ament_target_dependencies(timer
   "rclcpp"
   "rclcpp_components"
-  "tcl_reference_interfaces")
+  "tcl_reference_system_msg"
+  "reference_tcl_interface")
 
 rclcpp_components_register_node(timer
   PLUGIN "tcl_reference_system::TimerNode"
   EXECUTABLE timer_node)
 
 
-add_library(spin SHARED
-  src/spin_node.cpp)
+add_library(spin_component SHARED
+  src/spin_node_component.cpp)
 
-ament_target_dependencies(spin
+ament_target_dependencies(spin_component
   "rclcpp"
   "rclcpp_components"
-  "tcl_reference_interfaces")
+  "tcl_reference_system_msg"
+  "reference_tcl_interface")
   
-rclcpp_components_register_node(spin
-  PLUGIN "tcl_reference_system::SpinNode"
-  EXECUTABLE spin_node)
+rclcpp_components_register_node(spin_component
+  PLUGIN "tcl_reference_system::SpinNodeComponent"
+  EXECUTABLE spin_node_component)
+
+add_executable(spin_main
+src/spin_node_main.cpp)
+
+
+ament_target_dependencies(spin_main
+  "rclcpp"
+  "rclcpp_components"
+  "tcl_reference_system_msg"
+  "reference_tcl_interface"
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -67,7 +83,8 @@ endif()
 install(TARGETS
   spin_some
   timer
-  spin
+  spin_main
+  spin_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})
@@ -75,6 +92,7 @@ install(TARGETS
 install(DIRECTORY
   launch
   param
-  DESTINATION share/${PROJECT_NAME}/
+  config
+  DESTINATION share/${PROJECT_NAME}
 )
 ament_package()

@@ -2,7 +2,7 @@
 #define TCL_REFERENCE_SYSTEM__SPIN_NODE_HPP_
 
 #include <rclcpp/rclcpp.hpp>
-#include "tcl_reference_interfaces/msg/dynamic_message.hpp"
+#include "tcl_reference_system_msg/msg/dynamic_message.hpp"
 
 #include <random>
 #include <time.h>
@@ -10,12 +10,12 @@
 
 #include <time.h>
 
-using tcl_reference_interfaces::msg::DynamicMessage;
+using tcl_reference_system_msg::msg::DynamicMessage;
 
 namespace tcl_reference_system
 {
 
-class SpinNode : public rclcpp::Node
+class SpinNodeComponent : public rclcpp::Node
 {
 private:
     std::unordered_map<std::string, rclcpp::Publisher<DynamicMessage>::SharedPtr> pub_map_;
@@ -28,9 +28,9 @@ private:
     std::mt19937 * gen_;
 
 public:
-    explicit SpinNode(const rclcpp::NodeOptions& options);
+    explicit SpinNodeComponent(const rclcpp::NodeOptions& options);
 
-    ~SpinNode();
+    ~SpinNodeComponent();
     
     void
     normal_topic_callback(const DynamicMessage::SharedPtr msg);

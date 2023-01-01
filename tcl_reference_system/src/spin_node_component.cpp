@@ -1,9 +1,9 @@
-#include "tcl_reference_system/spin_node.hpp"
+#include "tcl_reference_system/spin_node_component.hpp"
 
 namespace tcl_reference_system
 {
-    SpinNode::SpinNode(const rclcpp::NodeOptions& options)
-    : Node("spin_node", options)
+    SpinNodeComponent::SpinNodeComponent(const rclcpp::NodeOptions& options)
+    : Node("spin_node_component", options)
     {
         int execution_time_mean = this->declare_parameter("execution_time_mean", 0);
         int message_size_mean = this->declare_parameter("message_size_mean", 0);
@@ -16,20 +16,20 @@ namespace tcl_reference_system
 
         auto qos = rclcpp::SensorDataQoS(rclcpp::KeepLast(1));
         
-        auto blocking_topics = this->get_node_timing_coordination_interface()->get_blocking_topics();
+        auto blocking_topics = this->get_node_timing_interface()->get_blocking_topics();
 
         std::for_each(sub_topics.begin(), sub_topics.end(), [&](auto& topic)
         {   
             if(std::find(blocking_topics.begin(), blocking_topics.end(), topic) == blocking_topics.end())
             {
-                sub_map_[topic] = this->create_subscription<DynamicMessage>(topic, qos, std::bind(&SpinNode::normal_topic_callback, this, std::placeholders::_1));
+                sub_map_[topic] = this->create_subscription<DynamicMessage>(topic, qos, std::bind(&SpinNodeComponent::normal_topic_callback, this, std::placeholders::_1));
             }
             else
             {
-                sub_map_[topic] = this->create_subscription<DynamicMessage>(topic, qos, std::bind(&SpinNode::blocking_topic_callback, this, std::placeholders::_1));
-
+                sub_map_[topic] = this->create_subscription<DynamicMessage>(topic, qos, std::bind(&SpinNodeComponent::blocking_topic_callback, this, std::placeholders::_1));
                 ++blocking_topic_num_;
             }
+            
         });
 
         std::for_each(pub_topics.begin(), pub_topics.end(), [&](auto& topic)
@@ -46,8 +46,8 @@ namespace tcl_reference_system
             message_size_deviation);
 
         // uncomment to use a deteministic seed
-        //      std::random_device rd;
-        //      gen_ = new std::mt19937(1701);
+        // std::random_device rd;
+        // gen_ = new std::mt19937(1701);
 
         //non-deterministic seed
         std::random_device rd;
@@ -55,18 +55,16 @@ namespace tcl_reference_system
     }
 
     void
-    SpinNode::normal_topic_callback(const DynamicMessage::SharedPtr msg)
+    SpinNodeComponent::normal_topic_callback(const DynamicMessage::SharedPtr msg)
     {
         (void)msg;
     }
 
     void
-    SpinNode::blocking_topic_callback(const DynamicMessage::SharedPtr msg)
+    SpinNodeComponent::blocking_topic_callback(const DynamicMessage::SharedPtr msg)
     {   
-        auto timing_header = this->get_node_timing_coordination_interface()->get_timing_header_ptr();
-
         static uint8_t count = 0;
-        // RCLCPP_INFO(this->get_logger(), "Subscribe");
+
         int sum = 0;
 
         ++count;
@@ -83,7 +81,7 @@ namespace tcl_reference_system
     }
 
     void 
-    SpinNode::do_something(int execution_time)
+    SpinNodeComponent::do_something(int execution_time)
     {
         int64_t start = this->now().nanoseconds();
 
@@ -96,7 +94,7 @@ namespace tcl_reference_system
     }
 
     void
-    SpinNode::publish(int message_size)
+    SpinNodeComponent::publish(int message_size)
     {
         DynamicMessage::UniquePtr msg(new DynamicMessage());
         auto size_per_data = sizeof(decltype(msg->data)::value_type);
@@ -109,17 +107,15 @@ namespace tcl_reference_system
         for(int i = 0; i < length; ++i)
             msg->data.emplace_back();
         
-        this->get_node_timing_coordination_interface()->propagate_timing_message();
-        
         std::for_each(pub_map_.begin(), pub_map_.end(), [&](auto& iter)
         {
             iter.second->publish(std::move(msg));
         });
-        // RCLCPP_INFO(this->get_logger(), "Publish");
+        RCLCPP_INFO(this->get_logger(), "SpinNode Publish");
     }
 
     void
-    SpinNode::execute()
+    SpinNodeComponent::execute()
     {
         int execution_time = (int)execution_time_generator_(*gen_);
         int message_size = (int)message_size_generator_(*gen_);
@@ -129,14 +125,11 @@ namespace tcl_reference_system
         publish(message_size);
     }
 
-    SpinNode::~SpinNode()
+    SpinNodeComponent::~SpinNodeComponent()
     {
         delete gen_;
     }
 }
 
 #include "rclcpp_components/register_node_macro.hpp"
-// Register the component with class_loader.
-// This acts as a sort of entry point, allowing the component to be discoverable when its library
-// is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(tcl_reference_system::SpinNode)
+RCLCPP_COMPONENTS_REGISTER_NODE(tcl_reference_system::SpinNodeComponent)

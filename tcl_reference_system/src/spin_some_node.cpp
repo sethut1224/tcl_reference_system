@@ -1,4 +1,5 @@
 #include "tcl_reference_system/spin_some_node.hpp"
+#include "reference_tcl_interface/reference_tcl_interface.hpp"
 
 namespace tcl_reference_system
 {
@@ -16,23 +17,19 @@ namespace tcl_reference_system
 
         auto qos = rclcpp::SensorDataQoS(rclcpp::KeepLast(1));
 
-        auto blocking_topics = this->get_node_timing_coordination_interface()->get_blocking_topics();
+        auto blocking_topics = this->get_node_timing_interface()->get_blocking_topics();
 
         std::for_each(sub_topics.begin(), sub_topics.end(), [&](auto& topic)
         {   
             if(std::find(blocking_topics.begin(), blocking_topics.end(), topic) == blocking_topics.end())
-            {
-                sub_map_[topic] = this->create_subscription<DynamicMessage>(topic, qos, std::bind(&SpinSomeNode::normal_topic_callback, this, std::placeholders::_1));
-            }
+                sub_map_[topic] = this->create_subscription<TCLDynamicMessage>(topic, qos, std::bind(&SpinSomeNode::normal_topic_callback, this, std::placeholders::_1));
             else
-            {
-                sub_map_[topic] = this->create_subscription<DynamicMessage>(topic, qos, std::bind(&SpinSomeNode::blocking_topic_callback, this, std::placeholders::_1));
-            }
+                sub_map_[topic] = this->create_subscription<TCLDynamicMessage>(topic, qos, std::bind(&SpinSomeNode::blocking_topic_callback, this, std::placeholders::_1));
         });
 
         std::for_each(pub_topics.begin(), pub_topics.end(), [&](auto& topic)
         {
-            pub_map_[topic] = this->create_publisher<DynamicMessage>(topic, qos);    
+            pub_map_[topic] = this->create_publisher<TCLDynamicMessage>(topic, qos);    
         });
 
         execution_time_generator_ = std::normal_distribution<float>(
@@ -44,8 +41,8 @@ namespace tcl_reference_system
             message_size_deviation);
 
         // uncomment to use a deteministic seed
-        //      std::random_device rd;
-        //      gen_ = new std::mt19937(1701);
+        // std::random_device rd;
+        // gen_ = new std::mt19937(1701);
 
         //non-deterministic seed
         std::random_device rd;
@@ -53,14 +50,18 @@ namespace tcl_reference_system
     }
 
     void
-    SpinSomeNode::normal_topic_callback(const DynamicMessage::SharedPtr msg)
+    SpinSomeNode::normal_topic_callback(const TCLDynamicMessage::SharedPtr msg)
     {
         (void)msg;
     }
 
     void
-    SpinSomeNode::blocking_topic_callback(const DynamicMessage::SharedPtr msg)
+    SpinSomeNode::blocking_topic_callback(const TCLDynamicMessage::SharedPtr tcl_msg)
     {
+        DynamicMessage::SharedPtr msg(new DynamicMessage());
+        reference_tcl_interface::messageInterface<TCLDynamicMessage, DynamicMessage>(
+            *tcl_msg, *msg, this->get_node_timing_interface());
+        
         int sum = 0;
         for(size_t i = 0; i < msg->length; ++i){
             sum += msg->data[i];
@@ -83,7 +84,9 @@ namespace tcl_reference_system
     void
     SpinSomeNode::publish(int message_size)
     {
-        DynamicMessage::UniquePtr msg(new DynamicMessage());
+        this->create_timing_header();
+        
+        DynamicMessage::SharedPtr msg(new DynamicMessage());
         auto size_per_data = sizeof(decltype(msg->data)::value_type);
 
         int length = message_size / size_per_data;
@@ -94,13 +97,15 @@ namespace tcl_reference_system
         for(int i = 0; i < length; ++i)
             msg->data.emplace_back();
 
-        auto timing_header = this->get_node_timing_coordination_interface()->create_timing_header();
-        this->get_node_timing_coordination_interface()->propagate_timing_message();
+        TCLDynamicMessage::SharedPtr tcl_msg(new TCLDynamicMessage());
+        reference_tcl_interface::messageInterface<DynamicMessage, TCLDynamicMessage>(
+            *msg, *tcl_msg, this->get_node_timing_interface());
         
         std::for_each(pub_map_.begin(), pub_map_.end(), [&](auto& iter)
         {
-            iter.second->publish(std::move(msg));
+            iter.second->publish(*tcl_msg);
         });
+        RCLCPP_INFO(this->get_logger(), "SpinSomeNode Publish");
     }
 
     void

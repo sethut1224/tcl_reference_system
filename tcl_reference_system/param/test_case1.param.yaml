@@ -5,7 +5,7 @@
       execution_time_deviation: 0.5
   
       message_size_mean: 40000
-      message_size_deviation: 2000.0
+      message_size_deviation: 200.0
 
       publish_topics: ['/front_lidar/points_raw']
 
@@ -14,10 +14,10 @@
       execution_time_deviation: 0.5
 
       message_size_mean: 10000
-      message_size_deviation: 2000.0
+      message_size_deviation: 200.0
 
-      subscribe_topics: ['/front_lidar/points_raw']
-      publish_topics: ['/front_lidar/downsampled_points']
+      subscribe_topics: ['/lidars/fused_points']
+      publish_topics: ['/lidars/downsampled_points']
     
     ndt_localizer:
       execution_time_mean: 45
@@ -26,7 +26,7 @@
       message_size_mean: 2000
       message_size_deviation: 0.0
 
-      subscribe_topics: ['/front_lidar/downsampled_points']
+      subscribe_topics: ['/lidars/downsampled_points']
       publish_topics: ['/ndt_pose']
 
     rear_lidar_driver:

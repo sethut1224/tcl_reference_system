@@ -2,22 +2,23 @@
 #define TCL_REFERENCE_SYSTEM__TIMER_NODE_HPP_
 
 #include <rclcpp/rclcpp.hpp>
-#include "tcl_reference_interfaces/msg/dynamic_message.hpp"
+#include "tcl_reference_system_msg/msg/dynamic_message.hpp"
+#include "tcl_reference_system_msg/msg/tcl_dynamic_message.hpp"
 
 #include <random>
 #include <time.h>
 #include <unordered_map>
 
-using tcl_reference_interfaces::msg::DynamicMessage;
-
+using tcl_reference_system_msg::msg::DynamicMessage;
+using tcl_reference_system_msg::msg::TCLDynamicMessage;
 namespace tcl_reference_system
 {
 
 class TimerNode : public rclcpp::Node
 {
 private:
-    std::unordered_map<std::string, rclcpp::Publisher<DynamicMessage>::SharedPtr> pub_map_;
-    std::unordered_map<std::string, rclcpp::Subscription<DynamicMessage>::SharedPtr> sub_map_;
+    std::unordered_map<std::string, rclcpp::Publisher<TCLDynamicMessage>::SharedPtr> pub_map_;
+    std::unordered_map<std::string, rclcpp::Subscription<TCLDynamicMessage>::SharedPtr> sub_map_;
 
     rclcpp::TimerBase::SharedPtr timer_;
 
@@ -31,10 +32,10 @@ public:
     ~TimerNode();
     
     void
-    normal_topic_callback(const DynamicMessage::SharedPtr msg);
+    normal_topic_callback(const TCLDynamicMessage::SharedPtr msg);
 
     void
-    blocking_topic_callback(const DynamicMessage::SharedPtr msg);
+    blocking_topic_callback(const TCLDynamicMessage::SharedPtr msg);
 
     void
     timer_callback();

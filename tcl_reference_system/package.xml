@@ -9,14 +9,12 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>rclcpp</build_depend>
-  <build_depend>rclcpp_components</build_depend>
-  <build_depend>tcl_reference_interfaces</build_depend>
-
-  <exec_depend>rclcpp</exec_depend>
-  <exec_depend>rclcpp_components</exec_depend>
-  <exec_depend>tcl_reference_interfaces</exec_depend>
-
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>tcl_reference_system_msg</depend>
+  <depend>reference_tcl_interface</depend>
+  <depend>tcl_std_msgs</depend>
+  
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
