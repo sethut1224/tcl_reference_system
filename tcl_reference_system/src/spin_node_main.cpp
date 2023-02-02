@@ -55,14 +55,19 @@ namespace tcl_reference_system
     }
 
     void
-    SpinNodeMain::normal_topic_callback(const TCLDynamicMessage::SharedPtr msg)
+    SpinNodeMain::normal_topic_callback(const TCLDynamicMessage::SharedPtr tcl_msg)
     {
-        (void)msg;
+        // (void)msg;
+        RCLCPP_INFO(this->get_logger(), "%s : Normal Topic Sub", this->get_name());
+        DynamicMessage::SharedPtr msg(new DynamicMessage());
+        reference_tcl_interface::messageInterface<TCLDynamicMessage, DynamicMessage>(
+            *tcl_msg, *msg, this->get_node_timing_interface());
     }
 
     void
     SpinNodeMain::blocking_topic_callback(const TCLDynamicMessage::ConstSharedPtr tcl_msg)
     {   
+        RCLCPP_INFO(this->get_logger(), "Blocking Topic Sub");
         static uint8_t count = 0;
 
         DynamicMessage::SharedPtr msg(new DynamicMessage());
@@ -118,7 +123,7 @@ namespace tcl_reference_system
         {
             iter.second->publish(*tcl_msg);
         });
-        RCLCPP_INFO(this->get_logger(), "SpinNode Publish");
+        // RCLCPP_INFO(this->get_logger(), "%s : SpinNode Publish ", this->get_name());
     }
 
     void

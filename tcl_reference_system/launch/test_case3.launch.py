@@ -25,7 +25,7 @@ import yaml
 import sys
 
 sys.path.append(get_package_share_directory('tcl_reference_system')+'/config')
-from test_case1_config import *
+from test_case3_config import *
 
 
 def generate_launch_description():
@@ -34,7 +34,7 @@ def generate_launch_description():
     node_characteristics_param_path = os.path.join(
         get_package_share_directory('tcl_reference_system'),
         'param',
-        'test_case1.param.yaml'
+        'test_case3.param.yaml'
     )
     
     with open(node_characteristics_param_path, "r") as f:
@@ -125,13 +125,122 @@ def generate_launch_description():
             ],
     )
 
-    return launch.LaunchDescription([
-        virtual_driver_vlp16_front, 
-        virtual_driver_vlp16_rear,
+    virtual_driver_camera = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_some', 
+            name='virtual_driver_camera',
+            output='log', 
+            parameters=[
+                node_characteristics_param['virtual_driver_camera'],
+                get_tcl_sched_param('virtual_driver_camera'),
+                get_tcl_timing_param('virtual_driver_camera')
+            ],
+    )
 
+    tensorrt_yolo = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_main', 
+            name='tensorrt_yolo',
+            output='log', 
+            parameters=[
+                node_characteristics_param['tensorrt_yolo'],
+                get_tcl_sched_param('tensorrt_yolo'),
+                get_tcl_timing_param('tensorrt_yolo')
+            ],
+    )
+
+    vision_detections = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_main', 
+            name='vision_detections',
+            output='log', 
+            parameters=[
+                node_characteristics_param['vision_detections'],
+                get_tcl_sched_param('vision_detections'),
+                get_tcl_timing_param('vision_detections')
+            ],
+    )
+
+    multi_object_tracker = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_main', 
+            name='multi_object_tracker',
+            output='screen', 
+            parameters=[
+                node_characteristics_param['multi_object_tracker'],
+                get_tcl_sched_param('multi_object_tracker'),
+                get_tcl_timing_param('multi_object_tracker')
+            ],
+    )
+
+    virtual_driver_vehicle_kinematic_state = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_some', 
+            name='virtual_driver_vehicle_kinematic_state',
+            output='log', 
+            parameters=[
+                node_characteristics_param['virtual_driver_vehicle_kinematic_state'],
+                get_tcl_sched_param('virtual_driver_vehicle_kinematic_state'),
+                get_tcl_timing_param('virtual_driver_vehicle_kinematic_state')
+            ],
+    )
+
+    universe_ekf_localizer = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_main', 
+            name='universe_ekf_localizer',
+            output='log', 
+            parameters=[
+                node_characteristics_param['universe_ekf_localizer'],
+                get_tcl_sched_param('universe_ekf_localizer'),
+                get_tcl_timing_param('universe_ekf_localizer')
+            ],
+    )
+
+    behavior_planner = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_main', 
+            name='behavior_planner',
+            output='log', 
+            parameters=[
+                node_characteristics_param['behavior_planner'],
+                get_tcl_sched_param('behavior_planner'),
+                get_tcl_timing_param('behavior_planner')
+            ],
+    )
+
+    pure_pursuit = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_main', 
+            name='pure_pursuit',
+            output='log', 
+            parameters=[
+                node_characteristics_param['pure_pursuit'],
+                get_tcl_sched_param('pure_pursuit'),
+                get_tcl_timing_param('pure_pursuit')
+            ],
+    )
+    return launch.LaunchDescription([
+
+        virtual_driver_vehicle_kinematic_state,
+        universe_ekf_localizer,
+        behavior_planner,
+        pure_pursuit,
+        
+        virtual_driver_vlp16_front, 
         point_cloud_fusion,
         voxel_grid,
         ndt_localizer,
+
+        virtual_driver_vlp16_rear,
         ray_ground_classifier,
         euclidean_clustering,
+
+        virtual_driver_camera,
+        tensorrt_yolo,
+        vision_detections,
+        multi_object_tracker,
+
+
+
     ])

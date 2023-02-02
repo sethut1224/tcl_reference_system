@@ -24,6 +24,8 @@ private:
     std::normal_distribution<float> message_size_generator_;
     std::mt19937 * gen_;
 
+    uint8_t blocking_topic_num_ {0};
+    
 public:
     explicit SpinSomeNode(const rclcpp::NodeOptions& options);
 

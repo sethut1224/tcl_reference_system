@@ -1,108 +1,147 @@
 /**:
   ros__parameters:
-    front_lidar_driver:
-      execution_time_mean: 3
-      execution_time_deviation: 0.5
+    virtual_driver_vlp16_front:
+      execution_time_mean: 2
+      execution_time_deviation: 0.1
   
-      message_size_mean: 40000
-      message_size_deviation: 200.0
+      message_size_mean: 4000
+      message_size_deviation: 20.0
 
-      publish_topics: ['/front_lidar/points_raw']
+      publish_topics: ['/lidar_front/points_raw']
 
-    voxel_grid_filter:
-      execution_time_mean: 8
-      execution_time_deviation: 0.5
-
-      message_size_mean: 10000
-      message_size_deviation: 200.0
-
-      subscribe_topics: ['/lidars/fused_points']
-      publish_topics: ['/lidars/downsampled_points']
-    
-    ndt_localizer:
-      execution_time_mean: 45
-      execution_time_deviation: 6.0
+    point_cloud_fusion:
+      execution_time_mean: 3
+      execution_time_deviation: 0.3
 
       message_size_mean: 2000
+      message_size_deviation: 10.0
+
+      subscribe_topics: ['/lidar_front/points_raw', '/lidar_rear/points_raw']
+      publish_topics: ['/lidars/points_fused']
+
+    voxel_grid:
+      execution_time_mean: 10
+      execution_time_deviation: 2.0
+
+      message_size_mean: 1000
+      message_size_deviation: 20.0
+
+      subscribe_topics: ['/lidars/points_fused']
+      publish_topics: ['/lidars/points_downsampled']
+    
+    ndt_localizer:
+      execution_time_mean: 40
+      execution_time_deviation: 5.0
+
+      message_size_mean: 200
       message_size_deviation: 0.0
 
-      subscribe_topics: ['/lidars/downsampled_points']
+      subscribe_topics: ['/lidars/points_downsampled']
       publish_topics: ['/ndt_pose']
 
-    rear_lidar_driver:
-      execution_time_mean: 3
-      execution_time_deviation: 0.5
+    virtual_driver_vlp16_rear:
+      execution_time_mean: 2
+      execution_time_deviation: 0.1
+  
+      message_size_mean: 4000
+      message_size_deviation: 20.0
 
-      message_size_mean: 40000
-      message_size_deviation: 2000.0
+      publish_topics: ['/lidar_rear/points_raw']
 
-      publish_topics: ['/rear_lidar/points_raw']
-    
-    point_cloud_fusion:
-      execution_time_mean: 4
-      execution_time_deviation: 0.5
-
-      message_size_mean: 80000
-      message_size_deviation: 1000.0
-
-      subscribe_topics: ['/front_lidar/points_raw', '/rear_lidar/points_raw']
-      publish_topics: ['/lidars/fused_points']
-
-    ray_ground_filter:
-      execution_time_mean: 9
+    ray_ground_classifier:
+      execution_time_mean: 6
       execution_time_deviation: 1.0
 
-      message_size_mean: 20000
-      message_size_deviation: 2000.0
+      message_size_mean: 2000
+      message_size_deviation: 20.0
 
-      subscribe_topics: ['/lidars/fused_points']
-      publish_topics: ['/lidars/no_ground_points']
+      subscribe_topics: ['/lidars/points_fused']
+      publish_topics: ['/lidars/points_nonground']
     
     euclidean_clustering:
-      execution_time_mean: 20
-      execution_time_deviation: 3.0
+      execution_time_mean: 29
+      execution_time_deviation: 5.5
 
-      message_size_mean: 5000
-      message_size_deviation: 1000.0
+      message_size_mean: 500
+      message_size_deviation: 10.0
 
-      subscribe_topics: ['/lidars/no_ground_points']
-      publish_topics: ['/detected_objects']
+      subscribe_topics: ['/lidars/points_nonground']
+      publish_topics: ['/lidars/objects']
 
-    odom_driver:
-      execution_time_mean: 1
-      execution_time_deviation: 0.2
+    virtual_driver_camera:
+      execution_time_mean: 4
+      execution_time_deviation: 0.5
 
       message_size_mean: 1000
       message_size_deviation: 0.0
 
-      publish_topics: ['/odom_raw']
+      publish_topics: ['/image/compressed']
     
-    vehicle_interface:
-      execution_time_mean: 1
-      execution_time_deviation: 0.2
+    tensorrt_yolo:
+      execution_time_mean: 24
+      execution_time_deviation: 3.0
 
       message_size_mean: 500
       message_size_deviation: 0.0
 
-      subscribe_topics: ['/odom_raw']
-      publish_topics: ['/vehicle_status']
+      subscribe_topics: ['/image/compressed']
+      publish_topics: ['/camera/detected_objects']
     
-    ekf_localizer:
-      execution_time_mean: 3
-      execution_time_deviation: 0.4
+    vision_detections:
+      execution_time_mean: 1
+      execution_time_deviation: 0.2
 
       message_size_mean: 400
       message_size_deviation: 0.0
 
-      subscribe_topics: ['/ndt_pose', '/vehicle_status']
-      publish_topics: ['/ekf_pose']
-
-    behavior_planner:
-      execution_time_mean: 3
+      subscribe_topics: ['/camera/detected_objects']
+      publish_topics: ['/camera/objects']
+    
+    multi_object_tracker:
+      execution_time_mean: 4
       execution_time_deviation: 0.3
 
-      message_size_mean: 3000
+      message_size_mean: 400
+      message_size_deviation: 0.0
+
+      subscribe_topics: ['/camera/objects', '/lidars/objects']
+      publish_topics: ['/detected_objects']
+
+    virtual_driver_vehicle_kinematic_state:
+      execution_time_mean: 1
+      execution_time_deviation: 0.0
+
+      message_size_mean: 100
+      message_size_deviation: 0.0
+
+      publish_topics: ['/vehicle/vehicle_kinematic_state']
+    
+    universe_ekf_localizer:
+      execution_time_mean: 1
+      execution_time_deviation: 0.1
+
+      message_size_mean: 50
+      message_size_deviation: 0.0
+
+      subscribe_topics: ['/vehicle/vehicle_kinematic_state', '/ndt_pose']
+      publish_topics: ['/vehicle/vehicle_state']
+    
+    behavior_planner:
+      execution_time_mean: 1
+      execution_time_deviation: 0.1
+
+      message_size_mean: 40
+      message_size_deviation: 0.0
+
+      subscribe_topics: ['/vehicle/vehicle_state', '/detected_objects']
+      publish_topics: ['/planning/trajectory']
+
+    pure_pursuit:
+      execution_time_mean: 1
+      execution_time_deviation: 0.1
+
+      message_size_mean: 30
       message_size_deviation: 0.1
 
-      subscribe_topics: ['/ekf_pose', '/detected_objects']
+      subscribe_topics: ['/planning/trajectory']
       publish_topics: ['/trajectory']

@@ -31,6 +31,7 @@ namespace tcl_reference_system
         {
             pub_map_[topic] = this->create_publisher<TCLDynamicMessage>(topic, qos);    
         });
+        
 
         execution_time_generator_ = std::normal_distribution<float>(
             execution_time_mean,
@@ -50,9 +51,12 @@ namespace tcl_reference_system
     }
 
     void
-    SpinSomeNode::normal_topic_callback(const TCLDynamicMessage::SharedPtr msg)
+    SpinSomeNode::normal_topic_callback(const TCLDynamicMessage::SharedPtr tcl_msg)
     {
-        (void)msg;
+        RCLCPP_INFO(this->get_logger(), "%s : Normal Topic Sub", this->get_name());
+        DynamicMessage::SharedPtr msg(new DynamicMessage());
+        reference_tcl_interface::messageInterface<TCLDynamicMessage, DynamicMessage>(
+            *tcl_msg, *msg, this->get_node_timing_interface());
     }
 
     void
@@ -101,11 +105,13 @@ namespace tcl_reference_system
         reference_tcl_interface::messageInterface<DynamicMessage, TCLDynamicMessage>(
             *msg, *tcl_msg, this->get_node_timing_interface());
         
+        RCLCPP_INFO(this->get_logger(), "%s : SomeNode Publish ", this->get_name());
+
         std::for_each(pub_map_.begin(), pub_map_.end(), [&](auto& iter)
         {
             iter.second->publish(*tcl_msg);
         });
-        RCLCPP_INFO(this->get_logger(), "SpinSomeNode Publish");
+        // RCLCPP_INFO(this->get_logger(), "SpinSomeNode Publish");
     }
 
     void

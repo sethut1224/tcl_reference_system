@@ -40,75 +40,76 @@ def generate_launch_description():
     with open(node_characteristics_param_path, "r") as f:
         node_characteristics_param = yaml.safe_load(f)["/**"]["ros__parameters"]
 
-    front_lidar_driver = launch_ros.actions.Node(
+    virtual_driver_vlp16_front = launch_ros.actions.Node(
             package='tcl_reference_system', 
-            executable='timer_node', 
-            name='front_lidar_driver',
-            output='screen', 
+            executable='spin_some', 
+            name='virtual_driver_vlp16_front',
+            output='log', 
             parameters=[
-                node_characteristics_param['front_lidar_driver'],
-                get_tcl_sched_param('front_lidar_driver'),
-                get_tcl_timing_param('front_lidar_driver')
+                node_characteristics_param['virtual_driver_vlp16_front'],
+                get_tcl_sched_param('virtual_driver_vlp16_front'),
+                get_tcl_timing_param('virtual_driver_vlp16_front')
             ],
         )
-    
-    rear_lidar_driver = launch_ros.actions.Node(
-            package='tcl_reference_system', 
-            executable='timer_node', 
-            name='rear_lidar_driver',
-            output='screen', 
-            parameters=[
-                node_characteristics_param['rear_lidar_driver'],
-                get_tcl_sched_param('rear_lidar_driver'),
-                get_tcl_timing_param('rear_lidar_driver')
-            ],
-        )
-    
+
     point_cloud_fusion = launch_ros.actions.Node(
             package='tcl_reference_system', 
             executable='spin_main', 
             name='point_cloud_fusion',
-            output='screen', 
+            output='log', 
             parameters=[
                 node_characteristics_param['point_cloud_fusion'],
                 get_tcl_sched_param('point_cloud_fusion'),
                 get_tcl_timing_param('point_cloud_fusion')
             ],
     )
-    
-    voxel_grid_filter = launch_ros.actions.Node(
+
+    voxel_grid = launch_ros.actions.Node(
             package='tcl_reference_system', 
             executable='spin_main', 
-            name='voxel_grid_filter',
-            output='screen', 
+            name='voxel_grid',
+            output='log', 
             parameters=[
-                node_characteristics_param['voxel_grid_filter'],
-                get_tcl_sched_param('voxel_grid_filter'),
-                get_tcl_timing_param('voxel_grid_filter')
+                node_characteristics_param['voxel_grid'],
+                get_tcl_sched_param('voxel_grid'),
+                get_tcl_timing_param('voxel_grid')
             ],
-        )
-    
+    )
+
     ndt_localizer = launch_ros.actions.Node(
             package='tcl_reference_system', 
             executable='spin_main', 
             name='ndt_localizer',
-            output='screen', 
+            output='log', 
             parameters=[
                 node_characteristics_param['ndt_localizer'],
                 get_tcl_sched_param('ndt_localizer'),
                 get_tcl_timing_param('ndt_localizer')
             ],
-        )
+    )
 
-    ray_ground_filter = launch_ros.actions.Node(
+    virtual_driver_vlp16_rear = launch_ros.actions.Node(
+            package='tcl_reference_system', 
+            executable='spin_some', 
+            name='virtual_driver_vlp16_rear',
+            output='log', 
+            parameters=[
+                node_characteristics_param['virtual_driver_vlp16_rear'],
+                get_tcl_sched_param('virtual_driver_vlp16_rear'),
+                get_tcl_timing_param('virtual_driver_vlp16_rear')
+            ],
+    )
+
+
+    ray_ground_classifier = launch_ros.actions.Node(
             package='tcl_reference_system', 
             executable='spin_main', 
-            name='ray_ground_filter',
-            output='screen', 
+            name='ray_ground_classifier',
+            output='log', 
             parameters=[
-                node_characteristics_param['ray_ground_filter'],
-                get_tcl_sched_param('ray_ground_filter'),
-                get_tcl_timing_param('ray_ground_filter')
+                node_characteristics_param['ray_ground_classifier'],
+                get_tcl_sched_param('ray_ground_classifier'),
+                get_tcl_timing_param('ray_ground_classifier')
             ],
         )
 
@@ -116,21 +117,24 @@ def generate_launch_description():
             package='tcl_reference_system', 
             executable='spin_main', 
             name='euclidean_clustering',
-            output='screen', 
+            output='log', 
             parameters=[
                 node_characteristics_param['euclidean_clustering'],
                 get_tcl_sched_param('euclidean_clustering'),
                 get_tcl_timing_param('euclidean_clustering')
             ],
-        )
+    )
 
-
+    
     return launch.LaunchDescription([
+
+        virtual_driver_vlp16_front, 
+        virtual_driver_vlp16_rear,
+        
         point_cloud_fusion,
-        front_lidar_driver,
-        rear_lidar_driver,
-        voxel_grid_filter,
-        ray_ground_filter,
+        voxel_grid,
         ndt_localizer,
+
+        ray_ground_classifier,
         euclidean_clustering,
     ])
